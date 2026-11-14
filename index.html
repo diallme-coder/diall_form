@@ -44,6 +44,11 @@
                    border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; margin: 0; cursor: pointer; }
   .choices input { width: auto; min-height: 0; margin: 0; accent-color: var(--accent); }
   .choices label:has(input:checked) { border-color: var(--accent); }
+  .group-label { display: block; font-size: .92rem; font-weight: 500; margin-bottom: 5px; }
+  .choices label { flex: 1; justify-content: center; padding: 8px 6px; }
+  .choices:has(input[name="time"]) { flex-wrap: nowrap; }
+  .confirm { display: flex; align-items: flex-start; gap: 10px; font-weight: 500; cursor: pointer; }
+  .confirm input { width: 20px; height: 20px; min-height: 0; margin: 2px 0 0; flex: none; accent-color: var(--accent); }
   .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
   button { width: 100%; font: inherit; font-weight: 600; border: 0; border-radius: 10px;
            background: var(--accent); color: var(--accent-ink); padding: 13px; min-height: 48px; cursor: pointer; }
@@ -62,68 +67,39 @@
 <main>
   <header>
     <h1>Request an appointment</h1>
-    <p>Pick a time that suits you and I'll get back to you to confirm.</p>
+    <p>Pick a day and time, and I'll call you to confirm.</p>
   </header>
 
   <form id="form" novalidate>
-    <fieldset>
-      <legend>Your details</legend>
+    <div class="row">
       <div class="field">
-        <label for="name">Full name</label>
-        <input id="name" name="name" autocomplete="name" required>
-      </div>
-      <div class="row">
-        <div class="field">
-          <label for="phone">Phone</label>
-          <input id="phone" name="phone" type="tel" autocomplete="tel" required>
-        </div>
-        <div class="field">
-          <label for="email">Email <span class="opt">(optional)</span></label>
-          <input id="email" name="email" type="email" autocomplete="email">
-        </div>
-      </div>
-    </fieldset>
-
-    <fieldset>
-      <legend>Appointment</legend>
-      <div class="field">
-        <label for="reason">What is it about?</label>
-        <select id="reason" name="reason" required>
-          <option value="">Choose one…</option>
-          <option>Meeting / consultation</option>
-          <option>Phone or video call</option>
-          <option>Business enquiry</option>
-          <option>Personal</option>
-          <option>Other</option>
-        </select>
-      </div>
-      <div class="row">
-        <div class="field">
-          <label for="date">Preferred date</label>
-          <input id="date" name="preferred_date" type="date" required>
-        </div>
-        <div class="field">
-          <label for="time">Preferred time</label>
-          <input id="time" name="preferred_time" type="time" required>
-        </div>
+        <label for="first">First name</label>
+        <input id="first" name="first_name" autocomplete="given-name" required>
       </div>
       <div class="field">
-        <label for="alt">Another time that works <span class="opt">(optional)</span></label>
-        <input id="alt" name="alternative_time" placeholder="e.g. Tuesday afternoon">
+        <label for="last">Last name</label>
+        <input id="last" name="last_name" autocomplete="family-name" required>
       </div>
-      <div class="field">
-        <span id="how-label" style="display:block;font-size:.92rem;font-weight:500;margin-bottom:5px">How should we meet?</span>
-        <div class="choices" role="radiogroup" aria-labelledby="how-label">
-          <label><input type="radio" name="format" value="In person" checked> In person</label>
-          <label><input type="radio" name="format" value="Phone call"> Phone</label>
-          <label><input type="radio" name="format" value="Video call"> Video</label>
-        </div>
+    </div>
+    <div class="field">
+      <label for="phone">Phone number</label>
+      <input id="phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required>
+    </div>
+    <div class="field">
+      <label for="date">Pick a date</label>
+      <input id="date" name="date" type="date" required>
+    </div>
+    <div class="field">
+      <span id="time-label" class="group-label">Pick a time</span>
+      <div class="choices" role="radiogroup" aria-labelledby="time-label">
+        <label><input type="radio" name="time" value="Morning" required> Morning</label>
+        <label><input type="radio" name="time" value="Afternoon"> Afternoon</label>
+        <label><input type="radio" name="time" value="Evening"> Evening</label>
       </div>
-      <div class="field">
-        <label for="message">Message <span class="opt">(optional)</span></label>
-        <textarea id="message" name="message" placeholder="Anything I should know beforehand"></textarea>
-      </div>
-    </fieldset>
+    </div>
+    <div class="field">
+      <label class="confirm"><input type="checkbox" name="call_me" value="Yes" required> Yes, call me to confirm my appointment</label>
+    </div>
 
     <!-- spam trap: real people never see or fill this -->
     <div class="hp" aria-hidden="true">
@@ -138,7 +114,7 @@
 
   <div id="done" class="done" hidden>
     <h2>Request sent ✓</h2>
-    <p>Thanks — I'll be in touch soon to confirm your appointment.</p>
+    <p>Thanks — I'll call you soon to confirm your appointment.</p>
   </div>
 </main>
 
@@ -162,7 +138,7 @@
     const lines = Object.entries(data)
       .filter(([k, v]) => !k.startsWith("_") && v)
       .map(([k, v]) => `${k.replace(/_/g, " ")}: ${v}`);
-    return "mailto:" + INBOX + "?subject=" + encodeURIComponent("Appointment request from " + data.name)
+    return "mailto:" + INBOX + "?subject=" + encodeURIComponent("Appointment request from " + data.first_name + " " + data.last_name)
       + "&body=" + encodeURIComponent(lines.join("\n"));
   }
 
@@ -179,11 +155,10 @@
 
     const payload = {
       ...data,
-      _subject: `Appointment request: ${data.name} — ${data.preferred_date} ${data.preferred_time}`,
+      _subject: `Appointment request: ${data.first_name} ${data.last_name} — ${data.date} (${data.time})`,
       _template: "table",
       _captcha: "false"
     };
-    if (data.email) payload._replyto = data.email;
 
     btn.disabled = true;
     btn.textContent = "Sending…";

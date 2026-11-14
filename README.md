@@ -6,7 +6,7 @@ A one-page form (`index.html`) people open by scanning a QR code to request an a
 - **QR codes:** `qr-card.png` (printable card), `qr.png` / `qr.svg` (code only)
 
 ## What visitors fill in
-Name, phone, optional email, reason, preferred date and time, an alternative time, meeting format (in person / phone / video) and a message.
+First name, last name, phone number, a date, a time of day (morning / afternoon / evening) and a required tick box asking to be called to confirm.
 
 ## Where requests go
 Submissions are emailed to the inbox set in `INBOX` in `index.html`, via [FormSubmit](https://formsubmit.co). The first submission sends a one-time activation email that must be confirmed. After activating, replace the address in `INBOX` with the random alias FormSubmit provides so the email isn't visible in the page source. If sending fails, visitors are offered a pre-filled email instead.
