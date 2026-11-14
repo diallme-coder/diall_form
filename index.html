@@ -128,6 +128,11 @@
   // alias FormSubmit gives you, so your email isn't visible in the page source.
   const INBOX = "diallohella@gmail.com";
 
+  // Instant phone alert via ntfy (https://ntfy.sh): subscribe to this topic in the ntfy app.
+  // The topic name is visible in the page source, so the alert carries no names
+  // or phone numbers — the full details only go to the email above.
+  const NTFY_TOPIC = "diall-appt-28d7b0e8ea9d9eba";
+
   const form = document.getElementById("form");
   const btn = document.getElementById("submit");
   const statusEl = document.getElementById("status");
@@ -167,13 +172,27 @@
     btn.disabled = true;
     btn.textContent = "Sending…";
     try {
-      const res = await fetch("https://formsubmit.co/ajax/" + INBOX, {
+      const sendEmail = fetch("https://formsubmit.co/ajax/" + INBOX, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
         body: JSON.stringify(payload)
+      }).then(async (res) => {
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok || String(out.success) === "false") throw new Error(out.message || "Email failed");
       });
-      const out = await res.json().catch(() => ({}));
-      if (!res.ok || String(out.success) === "false") throw new Error(out.message || "Send failed");
+      const sendPush = fetch("https://ntfy.sh/", {
+        method: "POST",
+        body: JSON.stringify({
+          topic: NTFY_TOPIC,
+          title: "New appointment request",
+          message: `${data.date} · ${data.time}. Details are in your email.`,
+          tags: ["calendar"],
+          priority: 4
+        })
+      }).then((res) => { if (!res.ok) throw new Error("Push failed"); });
+
+      const results = await Promise.allSettled([sendEmail, sendPush]);
+      if (results[0].status === "rejected") throw results[0].reason; // the email holds the details
       form.hidden = true;
       document.getElementById("done").hidden = false;
       window.scrollTo({ top: 0, behavior: "smooth" });

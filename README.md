@@ -11,6 +11,9 @@ First name, last name, phone number, a date, a time of day (morning / afternoon 
 ## Where requests go
 Submissions are emailed to the inbox set in `INBOX` in `index.html`, via [FormSubmit](https://formsubmit.co). The first submission sends a one-time activation email that must be confirmed. After activating, replace the address in `INBOX` with the random alias FormSubmit provides so the email isn't visible in the page source. If sending fails, visitors are offered a pre-filled email instead.
 
+## Phone alerts
+Each request also sends an instant push notification through [ntfy](https://ntfy.sh). Install the ntfy app (iPhone or Android) and subscribe to the topic in `NTFY_TOPIC` in `index.html`. The topic name is public in the page source, so the alert only shows the date and time slot. Names and phone numbers go to email only.
+
 ## Run locally
 ```
 python3 -m http.server 8000
