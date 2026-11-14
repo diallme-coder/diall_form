@@ -46,7 +46,11 @@
   .choices label:has(input:checked) { border-color: var(--accent); }
   .group-label { display: block; font-size: .92rem; font-weight: 500; margin-bottom: 5px; }
   .choices label { flex: 1; justify-content: center; padding: 8px 6px; }
-  .choices:has(input[name="time"]) { flex-wrap: nowrap; }
+  .choices:has(input[name="time"]) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .choices:has(input[name="time"]) label { position: relative; padding: 11px 4px; min-width: 0; font-weight: 500; }
+  .choices:has(input[name="time"]) input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+  .choices:has(input[name="time"]) label:has(input:checked) { background: var(--accent); color: var(--accent-ink); }
+  .choices:has(input[name="time"]) label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
   .confirm { display: flex; align-items: flex-start; gap: 10px; font-weight: 500; cursor: pointer; }
   .confirm input { width: 20px; height: 20px; min-height: 0; margin: 2px 0 0; flex: none; accent-color: var(--accent); }
   .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
